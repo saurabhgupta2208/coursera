@@ -20,12 +20,12 @@ function FoundItemsDirective() {
   return ddo;
 }
 
-
-function FoundItemsDirectiveController() {
+FoundItemsDirectiveController.$inject = ['$scope'];
+function FoundItemsDirectiveController($scope) {
   var list = this;
 
   list.isEmpty = function () {
-    if(list.found!=null && list.found.length>0){
+    if(angular.isUndefined($scope.$parent.term) || (list.found!=null && list.found.length>0)){
       return false;
     }else{
       return true;
@@ -33,18 +33,21 @@ function FoundItemsDirectiveController() {
   };
 }
 
-NarrowItDownController.$inject = ['MenuSearchService'];
-function NarrowItDownController(MenuSearchService) {
+NarrowItDownController.$inject = ['$scope','MenuSearchService'];
+function NarrowItDownController($scope, MenuSearchService) {
   var list = this;
   list.term = "";
   list.found = null;
   list.searchTerm = function (){
+      $scope.term = list.term;
       MenuSearchService.clear();
       if(null != list.term && list.term !=""){
-        var promise = MenuSearchService.getMatchedMenuItems(list.term);
+        var promise = MenuSearchService.getMatchedMenuItems(list.term.trim());
         promise.then(function (response) {
           list.found = response;
         })
+      }else{
+        list.found = null;
       }
   }
 
